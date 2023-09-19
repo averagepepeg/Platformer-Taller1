@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - Platform
+  - Wall
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - Ground
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: Background
+    uniqueID: 2772820757
+    locked: 0
+  - name: Tilemaps
+    uniqueID: 2599696457
+    locked: 0
+  - name: Props
+    uniqueID: 1702075239
+    locked: 0
+  - name: Player
+    uniqueID: 437067931
+    locked: 0
+  - name: New Layer 5
+    uniqueID: 1488967963
+    locked: 0
+  - name: New Layer 6
+    uniqueID: 3784492323
+    locked: 0
+  - name: New Layer 7
+    uniqueID: 2981926647
+    locked: 0
+  - name: New Layer 8
+    uniqueID: 983762487
+    locked: 0
