@@ -43,10 +43,10 @@ public class PlayerMovement : MonoBehaviour
     }
     private void WallSlide()
     {
-        if (IsWalled() && !IsGrounded() && moveDirection !=0f)
+        if (IsWalled() && !IsGrounded())
         {
             isWallSliding = true;
-            rb.velocity = new Vector2(0f, Mathf.Clamp(rb.velocity.y, -wallSlidingSpeed, float.MaxValue));
+            rb.velocity = new Vector2(0f,-wallSlidingSpeed);
             animator.SetBool("WallContact",true);
         }
         else
@@ -77,6 +77,11 @@ public class PlayerMovement : MonoBehaviour
         if (value.isPressed)
         {
             if(Capsulecollider.IsTouchingLayers(LayerMask.GetMask("Ground")))
+            {
+                animator.SetBool("IsJumping",true);
+                rb.velocity += new Vector2(0f, jumpSpeed);
+            }
+            if(IsWalled())
             {
                 animator.SetBool("IsJumping",true);
                 rb.velocity += new Vector2(0f, jumpSpeed);
