@@ -46,7 +46,7 @@ public class PlayerMovement : MonoBehaviour
         if (IsWalled() && !IsGrounded())
         {
             isWallSliding = true;
-            rb.velocity = new Vector2(0f,-wallSlidingSpeed);
+            rb.velocity = new Vector2(0f,Mathf.Clamp(rb.velocity.y, -wallSlidingSpeed, float.MaxValue));
             animator.SetBool("WallContact",true);
         }
         else
