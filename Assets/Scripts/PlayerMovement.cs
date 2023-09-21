@@ -12,10 +12,10 @@ using UnityEngine.PlayerLoop;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [SerializeField]private float runSpeed = 2f;
+    [SerializeField]private float runSpeed = 4f;
     private float moveDirection = 0f;
     private float dir = 1f;
-    [SerializeField]private float jumpSpeed = 4f;
+    [SerializeField]private float jumpSpeed = 10f;
     private Rigidbody2D rb;
     private Animator animator;
     private CapsuleCollider2D Capsulecollider;
@@ -52,8 +52,9 @@ public class PlayerMovement : MonoBehaviour
         if (IsWalled() && !IsGrounded())
         {
             //isWallSliding = true;
-            rb.velocity = new Vector2(0f,Mathf.Clamp(rb.velocity.y, -wallSlidingSpeed, float.MaxValue));
+            rb.velocity = new Vector2(rb.velocity.x,Mathf.Clamp(rb.velocity.y, -wallSlidingSpeed, float.MaxValue));
             animator.SetBool("WallContact",true);
+ 
         }
         else
         {
@@ -111,16 +112,13 @@ public class PlayerMovement : MonoBehaviour
                             Debug.Log("Forsan");
                 
                 //rb.velocity += new Vector2(0f, jumpSpeed);
-                rb.velocity = (new Vector2(-1,1))*5f;
+               // rb.velocity += new Vector2(-100f,8f);
+               rb.AddForce(new Vector2(-100f,8f));
                 animator.SetBool("IsJumping",true);
             }
             
         }
       
-    }
-    private void WallJump(InputValue value)
-    {
-
     }
     private void Airborne()
     {
@@ -142,7 +140,9 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("IsRunning", true);
         };
 
+
         rb.velocity = new Vector2(runSpeed * moveDirection, rb.velocity.y);
+        
     }
     private void FlipSprite()
     {
