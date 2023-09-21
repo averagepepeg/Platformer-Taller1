@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Security.Cryptography;
 using Unity.VisualScripting;
+using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.InputSystem;
@@ -13,22 +14,14 @@ public class PlayerMovement : MonoBehaviour
 {
     [SerializeField]private float runSpeed = 2f;
     private float moveDirection = 0f;
-    [SerializeField]private float jumpSpeed = 8f;
+    private float dir = 1f;
+    [SerializeField]private float jumpSpeed = 4f;
     private Rigidbody2D rb;
     private Animator animator;
     private CapsuleCollider2D Capsulecollider;
-    private float horizontal;
-  
-    private bool isWallSliding;
-    [SerializeField] private float wallSlidingSpeed = 2f;
-    [SerializeField] private Transform wallCheck;
-    [SerializeField] private LayerMask wallLayer;
-    [SerializeField] private Transform groundCheck;
-    [SerializeField] private LayerMask groundLayer;
+    //private bool isWallSliding;
+    [SerializeField] private float wallSlidingSpeed = 0.5f;
 
-
-
-    
 
     private void Start() 
     {
@@ -39,19 +32,32 @@ public class PlayerMovement : MonoBehaviour
 
     private bool IsWalled()
     {
-        return Physics2D.OverlapCircle(wallCheck.position, 0.2f, wallLayer);
+        
+        // return Physics2D.OverlapCircle(wallCheck.position, 0.2f, wallLayer);
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, new Vector2(dir, 0f),0.4f);
+        if (hit)
+        {
+
+            return true;  
+
+        }
+        else
+        {
+            return false;
+        }
+        
     }
     private void WallSlide()
     {
         if (IsWalled() && !IsGrounded())
         {
-            isWallSliding = true;
+            //isWallSliding = true;
             rb.velocity = new Vector2(0f,Mathf.Clamp(rb.velocity.y, -wallSlidingSpeed, float.MaxValue));
             animator.SetBool("WallContact",true);
         }
         else
         {
-            isWallSliding = false;
+            //isWallSliding = false;
             animator.SetBool("WallContact",false);
         }
     }
@@ -60,16 +66,35 @@ public class PlayerMovement : MonoBehaviour
         if(IsGrounded())
         {
             animator.SetBool("IsFalling",false);
+            animator.SetBool("WallContact",false);
         }
     }
     private bool IsGrounded()
     {
-        return Physics2D.OverlapCircle(groundCheck.position,0.2f, groundLayer);
+        //return Physics2D.OverlapCircle(groundCheck.position,0.2f, groundLayer);
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, new Vector2(0f, -1f),0.52f);
+        if (hit)
+        {
+            animator.SetBool("IsFalling",false);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     private void OnMove(InputValue value)
     {
         moveDirection = value.Get<float>();
+        if (moveDirection ==1)
+        {
+            dir = 1f;
+        }
+        else if (moveDirection ==-1)
+        {
+            dir =-1f;
+        }
         
     }
     private void OnJump(InputValue value)
@@ -81,14 +106,21 @@ public class PlayerMovement : MonoBehaviour
                 animator.SetBool("IsJumping",true);
                 rb.velocity += new Vector2(0f, jumpSpeed);
             }
-            if(IsWalled())
+            else if(IsWalled())
             {
+                            Debug.Log("Forsan");
+                
+                //rb.velocity += new Vector2(0f, jumpSpeed);
+                rb.velocity = (new Vector2(-1,1))*5f;
                 animator.SetBool("IsJumping",true);
-                rb.velocity += new Vector2(0f, jumpSpeed);
             }
             
         }
       
+    }
+    private void WallJump(InputValue value)
+    {
+
     }
     private void Airborne()
     {
@@ -131,13 +163,15 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-
         Run();
         FlipSprite();
         Airborne();
+        IsWalled();
+        //IsGrounded();
         WallSlide();
         Grounded();
-        
+        Debug.DrawRay(transform.position,new Vector2(dir,0)*10f, Color.red);
+        Debug.DrawRay(transform.position,new Vector2(0f,-1f)*0.50f, Color.blue);
     }
 
     
