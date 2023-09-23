@@ -12,15 +12,29 @@ using UnityEngine.PlayerLoop;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [SerializeField]private float runSpeed = 4f;
+
     private float moveDirection = 0f;
     private float dir = 1f;
-    [SerializeField]private float jumpSpeed = 10f;
+    private bool CanDoubleJump;
+
+    private bool canDash = true;
+    private bool isDashing;
+    private float dashingPower = 24f;
+    private float dashingTime = 0.2f;
+    private float dashingCD = 1f;
+
+
     private Rigidbody2D rb;
     private Animator animator;
     private CapsuleCollider2D Capsulecollider;
     //private bool isWallSliding;
+
+    [SerializeField] private float runSpeed = 4f;
+    [SerializeField] private float jumpSpeed = 10f;
+    [SerializeField] private float DoblejumpSpeed = 10f;
     [SerializeField] private float wallSlidingSpeed = 0.5f;
+    [SerializeField] private TrailRenderer tr;
+
 
 
     private void Start() 
@@ -37,7 +51,8 @@ public class PlayerMovement : MonoBehaviour
         RaycastHit2D hit = Physics2D.Raycast(transform.position, new Vector2(dir, 0f),0.4f);
         if (hit)
         {
-
+            //Debug.Log("IsWalled");
+            CanDoubleJump = true;
             return true;  
 
         }
@@ -76,7 +91,9 @@ public class PlayerMovement : MonoBehaviour
         RaycastHit2D hit = Physics2D.Raycast(transform.position, new Vector2(0f, -1f),0.52f);
         if (hit)
         {
+            //Debug.Log("IsGrounded");
             animator.SetBool("IsFalling",false);
+            CanDoubleJump = true;
             return true;
         }
         else
@@ -102,24 +119,38 @@ public class PlayerMovement : MonoBehaviour
     {
         if (value.isPressed)
         {
-            if(Capsulecollider.IsTouchingLayers(LayerMask.GetMask("Ground")))
+            if(IsGrounded())
+            //if(Capsulecollider.IsTouchingLayers(LayerMask.GetMask("Ground")))
             {
+                Debug.Log("GroundJump");
                 animator.SetBool("IsJumping",true);
                 rb.velocity += new Vector2(0f, jumpSpeed);
             }
-            else if(IsWalled())
+            if(IsWalled())
             {
-                            Debug.Log("Forsan");
-                
                 //rb.velocity += new Vector2(0f, jumpSpeed);
-               // rb.velocity += new Vector2(-100f,8f);
-               rb.AddForce(new Vector2(-100f,8f));
-                animator.SetBool("IsJumping",true);
+               rb.velocity += new Vector2(-20f,8f);
+               Debug.Log("Forsan");
+               animator.SetBool("IsJumping",true);
             }
-            
+            if (!IsGrounded() && !IsWalled() && CanDoubleJump)
+            {
+                Debug.Log("DobleJump");
+                rb.velocity += new Vector2(0f, DoblejumpSpeed);
+                CanDoubleJump = false;
+            }
+
         }
       
     }
+   /* private void OnDesh(InputValue value)
+    {
+        if (value.isPressed && canDash)
+        {
+            StartCoroutine(Dash());
+        }
+           
+    }*/
     private void Airborne()
     {
         if (Mathf.Sign(rb.velocity.y) < 0 && animator.GetBool("IsJumping")== true) 
@@ -128,6 +159,7 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("IsFalling",true);
             rb.gravityScale = 2f;
         }
+        
     }
     private void Run()
     {
@@ -149,7 +181,21 @@ public class PlayerMovement : MonoBehaviour
         if (Mathf.Abs(rb.velocity.x) > Mathf.Epsilon)
         transform.localScale = new Vector3 (Mathf.Sign(rb.velocity.x),1f,1f);
     }
-
+    private IEnumerator Dash()
+    {
+        canDash = false;
+        isDashing = true;
+        float originalGravity = rb.gravityScale;
+        rb.gravityScale = 0f;
+        rb.velocity = new Vector2(dir * dashingPower, 0f);
+        tr.emitting = true;
+        yield return new WaitForSeconds(dashingTime);
+        tr.emitting = false;
+        rb.gravityScale = originalGravity;
+        isDashing = false;
+        yield return new WaitForSeconds(dashingCD);
+        canDash = true; ;
+    }
     // private void OnCollisionEnter2D(Collision2D other) 
     // {
     //     if (other.transform.CompareTag("Platform"))
@@ -163,13 +209,21 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+        if (isDashing)
+        {
+            return;
+        }
         Run();
         FlipSprite();
         Airborne();
-        IsWalled();
+        //IsWalled();
         //IsGrounded();
         WallSlide();
         Grounded();
+        if (Input.GetKeyDown(KeyCode.LeftShift) && canDash)
+        {
+            StartCoroutine(Dash());
+        }
         Debug.DrawRay(transform.position,new Vector2(dir,0)*10f, Color.red);
         Debug.DrawRay(transform.position,new Vector2(0f,-1f)*0.50f, Color.blue);
     }
